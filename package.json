@@ -1,0 +1,27 @@
+{
+  "name": "system-base",
+  "version": "0.0.0",
+  "description": "System Base - Types for Systems",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": "git@github.com:NateFerrero/system-base.git",
+  "author": "Nate Ferrero <nateferrero@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "files": [
+    "dist/index.js",
+    "dist/index.js.map",
+    "dist/index.d.ts",
+    "src/index.ts"
+  ],
+  "scripts": {
+    "prepare": "rm -rf ./dist && npm run build",
+    "build": "tsc --declaration",
+    "lint": "tslint -c tslint.json -p ./ ./src/*.ts",
+    "lint-watch": "nodemon -e ts -w ./ -x npm run lint"
+  },
+  "devDependencies": {
+    "tslint": "^5.9.1",
+    "typescript": "^3"
+  }
+}
