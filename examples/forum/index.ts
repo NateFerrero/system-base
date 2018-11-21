@@ -1,6 +1,24 @@
 import { attr, validate, get, item, IItem } from "../../src"
 
-import { Author, Body, Comment, Post, UserName, User, Reply } from "./types"
+import {
+  Author,
+  Body,
+  Comment,
+  Post,
+  UserName,
+  User,
+  Reply,
+  Forum,
+  Member,
+  Submission,
+  PermissionGrant,
+  Permission,
+  Role,
+  GrantCapability,
+  Capability,
+  Scope,
+  Action
+} from "./types"
 
 const userBob = item(User, attr(UserName, "bob.the.builder"))
 
@@ -15,6 +33,21 @@ const post = item(
   attr(Author, userBob),
   attr(Body, "This is a post"),
   attr(Reply, comment)
+)
+
+const editPosts = item(Capability, attr(Scope, Post), attr(Action, "edit"))
+
+const userBobCanEditPosts = item(
+  Permission,
+  attr(Role, userBob),
+  attr(GrantCapability, editPosts)
+)
+
+const forum = item(
+  Forum,
+  attr(Member, userBob),
+  attr(Submission, post),
+  attr(PermissionGrant, userBobCanEditPosts)
 )
 
 console.log(validate(post))
