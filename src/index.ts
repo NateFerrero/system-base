@@ -130,7 +130,7 @@ export const get = <T>(
       return matchingAttribute.value as T
     }
   }
-  return nextItem
+  return nextItem as any
 }
 export const attr = <T>(type: IAttributeType<T>, value: T) => ({
   type,
