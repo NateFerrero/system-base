@@ -10,7 +10,6 @@ export type Any = IConcept | Value
 export interface IDefinition<T> {
   attributeConstraints?: IAttributeConstraint[]
   attributeTypes?: IAttributeType<Any>[]
-  itemTypes?: IItemType[]
   itemLabel: string
 }
 
@@ -53,32 +52,22 @@ const _validate = (item: IItem, context: string = "") => {
             } attribute not allowed`
           )
         }
-      })
-    } else {
-      errors.push(`${context}${item.type.itemLabel}#* attributes not allowed`)
-    }
-  }
 
-  if (item.items !== undefined && item.items.length > 0) {
-    const { itemTypes } = item.type
-
-    if (itemTypes !== undefined) {
-      item.items.forEach(subItem => {
-        if (itemTypes.indexOf(subItem.type) === -1) {
-          errors.push(
-            `${context}${item.type.itemLabel}.${
-              subItem.type.itemLabel
-            } item not allowed`
-          )
-        } else {
-          errors.push.apply(
-            errors,
-            _validate(subItem, `${item.type.itemLabel}.`)
-          )
+        if (
+          typeof attribute.value !== "string" &&
+          typeof attribute.value !== "boolean" &&
+          typeof attribute.value !== "number"
+        ) {
+          if ("type" in attribute.value) {
+            errors.push.apply(
+              errors,
+              _validate(attribute.value as IItem, `${item.type.itemLabel}.`)
+            )
+          }
         }
       })
     } else {
-      errors.push(`${context}${item.type.itemLabel}.* items not allowed`)
+      errors.push(`${context}${item.type.itemLabel}#* attributes not allowed`)
     }
   }
 
@@ -111,30 +100,71 @@ const _validate = (item: IItem, context: string = "") => {
 export const getValue = <T>(attribute: IAttribute<T>) =>
   attribute === undefined ? undefined : attribute.value
 
-export const getAttribute = <T>(
-  item: IItem,
-  attributeType: IAttributeType<T>
-) =>
-  item === undefined || item.attributes === undefined
-    ? undefined
-    : item.attributes.find(attribute => attribute.type === attributeType)
+export const get = <T>(
+  item?: IItem,
+  ...attributeTypes: IAttributeType<Any>[]
+): T | undefined => {
+  if (item === undefined) {
+    return undefined
+  }
+  let nextItem: IItem = item
+  let attributeType: IAttributeType<Any> | undefined
+  while ((attributeType = attributeTypes.shift())) {
+    let matchingAttribute =
+      nextItem === undefined || nextItem.attributes === undefined
+        ? undefined
+        : nextItem.attributes.find(
+            attribute => attribute.type === attributeType
+          )
 
-export const getItem = <T>(item: IItem, itemType: IItemType) =>
-  item.items === undefined
-    ? undefined
-    : item.items.find(item => item.type === itemType)
-
-export const attribute = <T>(type: IAttributeType<T>, value: T) => ({
+    if (
+      matchingAttribute !== undefined &&
+      matchingAttribute.value &&
+      typeof matchingAttribute.value === "object" &&
+      "type" in matchingAttribute.value
+    ) {
+      nextItem = matchingAttribute.value
+    } else if (matchingAttribute === undefined) {
+      return undefined
+    } else {
+      return matchingAttribute.value as T
+    }
+  }
+  return nextItem
+}
+export const attr = <T>(type: IAttributeType<T>, value: T) => ({
   type,
   value
 })
 
 export const item = (
   type: IItemType,
-  attributes: IAttribute<Any>[] = [],
-  items: IItem[] = []
+  ...attributes: IAttribute<Any>[]
 ): IItem => ({
   type,
-  attributes,
-  items
+  attributes
+})
+
+export const defineItem = (
+  itemLabel: string,
+  attributeTypes: IAttributeType<Any>[] = [],
+  ...attributeConstraints: IAttributeConstraint[]
+): IItemType => ({
+  itemLabel,
+  attributeTypes,
+  attributeConstraints
+})
+
+export const defineAttr = <T = void>(
+  attributeLabel: string
+): IAttributeType<T> => ({
+  attributeLabel
+})
+
+export const required = (
+  attributeType: IAttributeType<Any>,
+  exactQuantity: number = 1
+): IAttributeConstraint => ({
+  attributeType,
+  exactQuantity
 })

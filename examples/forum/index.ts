@@ -1,47 +1,27 @@
-import {
-  attribute,
-  IItem,
-  validate,
-  getAttribute,
-  getItem,
-  getValue,
-  item
-} from "../../src"
+import { attr, validate, get, item, IItem } from "../../src"
 
-import {
-  AuthorAttributeType,
-  BodyAttributeType,
-  CommentType,
-  PostType,
-  UserNameAttributeType,
-  UserType
-} from "./types"
+import { Author, Body, Comment, Post, UserName, User, Reply } from "./types"
 
-const userName = attribute(UserNameAttributeType, "bob.the.builder")
+const userBob = item(User, attr(UserName, "bob.the.builder"))
 
-const userBob: IItem = {
-  attributes: [userName, userName],
-  type: UserType
-}
-
-const comment = item(CommentType, [
-  attribute(AuthorAttributeType, userBob),
-  attribute(BodyAttributeType, "This is a comment")
-])
+const comment = item(
+  Comment,
+  attr(Author, userBob),
+  attr(Body, "This is a comment")
+)
 
 const post = item(
-  PostType,
-  [
-    attribute(AuthorAttributeType, userBob),
-    attribute(BodyAttributeType, "This is a post")
-  ],
-  [comment]
+  Post,
+  attr(Author, userBob),
+  attr(Body, "This is a post"),
+  attr(Reply, comment)
 )
 
 console.log(validate(post))
 
-console.log(getValue(getAttribute(post, BodyAttributeType)))
+console.log(get(post, Body))
 
 console.log(
-  getValue(getAttribute(getItem(post, CommentType), BodyAttributeType))
+  get<string>(post, Reply, Body),
+  get<string>(get<IItem>(post, Reply), Body)
 )

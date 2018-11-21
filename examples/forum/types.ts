@@ -1,63 +1,26 @@
-import {
-  IAttributeConstraint,
-  IAttributeType,
-  IItemType,
-  IItem
-} from "../../src"
+import { IItem, defineAttr, required, defineItem } from "../../src"
 
-export const UserNameAttributeType: IAttributeType<string> = {
-  attributeLabel: "UserName"
-}
+export const Author = defineAttr<IItem>("Author")
+export const Body = defineAttr<string>("Body")
+export const Member = defineAttr<IItem>("Member")
+export const Reply = defineAttr<IItem>("Reply")
+export const Submission = defineAttr<IItem>("Submission")
+export const UserName = defineAttr<string>("UserName")
 
-export const UserNameAttributeRequiredConstraint: IAttributeConstraint = {
-  attributeType: UserNameAttributeType,
-  exactQuantity: 1
-}
+export const User = defineItem("User", [UserName], required(UserName))
 
-export const UserType: IItemType = {
-  attributeConstraints: [UserNameAttributeRequiredConstraint],
-  attributeTypes: [UserNameAttributeType],
-  itemLabel: "User"
-}
+export const Comment = defineItem(
+  "Comment",
+  [Author, Body],
+  required(Author),
+  required(Body)
+)
 
-export const AuthorAttributeType: IAttributeType<IItem> = {
-  attributeLabel: "Author"
-}
+export const Post = defineItem(
+  "Post",
+  [Author, Body, Reply],
+  required(Author),
+  required(Body)
+)
 
-export const AuthorAttributeRequiredConstraint: IAttributeConstraint = {
-  attributeType: AuthorAttributeType,
-  exactQuantity: 1
-}
-
-export const BodyAttributeType: IAttributeType<string> = {
-  attributeLabel: "Body"
-}
-
-export const BodyAttributeRequiredConstraint: IAttributeConstraint = {
-  attributeType: BodyAttributeType,
-  exactQuantity: 1
-}
-
-export const CommentType: IItemType = {
-  attributeConstraints: [
-    AuthorAttributeRequiredConstraint,
-    BodyAttributeRequiredConstraint
-  ],
-  attributeTypes: [AuthorAttributeType, BodyAttributeType],
-  itemLabel: "Comment"
-}
-
-export const PostType: IItemType = {
-  attributeConstraints: [
-    AuthorAttributeRequiredConstraint,
-    BodyAttributeRequiredConstraint
-  ],
-  attributeTypes: [AuthorAttributeType, BodyAttributeType],
-  itemTypes: [CommentType],
-  itemLabel: "Post"
-}
-
-export const ForumType: IItemType = {
-  itemLabel: "Forum",
-  itemTypes: [UserType, PostType]
-}
+export const Forum = defineItem("Forum", [Member, Submission])
